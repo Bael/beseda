@@ -52,7 +52,7 @@
     <div class="row">
 
       <div class="col-xs-12 chat-window" style="height:260px;">
-			<span ng-repeat="item in vm.chatHistory">{{item}}<br></span>
+			<span ng-repeat="item in vm.chatHistory track by $index">{{vm.chatHistory[$index]}}<br></span>
 
        <!-- <form id="reciveForm">
           <textarea type="text" class="form-control" readonly="" style="height:260px;" ng-model="vm.chatData"></textarea>
@@ -190,7 +190,7 @@ vm.chatHistory=chatHistory;
 
 
 
-console.log(vm.chatHistory.join("!"));
+//console.log(vm.chatHistory.join("!"));
 
 
 /*  $interval(function(){
