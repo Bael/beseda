@@ -7,6 +7,35 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
  
+<style type="text/css">
+   .no-padding {
+		 padding:1px;
+	}
+
+
+	.chat-window:focus {
+	border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+	}
+
+	.chat-window {
+	 display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+	border-color: #66afe9;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+	overflow-y:auto;
+	}
+
+  </style>
+
 </head>
 
 <body ng-app="chat">
@@ -22,11 +51,12 @@
 
     <div class="row">
 
-      <div class="col-xs-12">
+      <div class="col-xs-12 chat-window" style="height:260px;">
+			<span ng-repeat="item in vm.chatHistory">{{item}}<br></span>
 
-        <form id="reciveForm">
+       <!-- <form id="reciveForm">
           <textarea type="text" class="form-control" readonly="" style="height:260px;" ng-model="vm.chatData"></textarea>
-        </form>
+        </form> -->
       </div>
     </div>
 
@@ -53,6 +83,7 @@
       </form>
     </div>
 
+
   </div>
 
   
@@ -63,11 +94,38 @@
 
 var chatHistory=[];
 
+
+
 function timeNow(){
   date=new Date();
  return ("[" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "] ...");
   
-}
+};
+
+
+
+/*
+
+function subscribe() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/subscribe", true);
+        xhr.onreadystatechange = function() {
+            if (this.readyState != 4) return;
+            if (this.status != 200) {
+                setTimeout(subscribe, 500);
+                return;
+            }
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode(this.responseText));
+            messages.appendChild(li);
+            subscribe();
+        };
+        xhr.send(null);
+    };
+
+*/
+
+
 
 var app=angular.module('chat', []);
 
@@ -81,12 +139,30 @@ app.service('sendService', function($http){
   };
 });
 
-app.service('getService', function($http){
-  return {
-    getFromServer: function(){
-      //console.log("service");
+app.service('getService', getService);
 
-	return $http.get('/subscribe',true);
+ function getService($http, $interval){
+return {
+getFromServer: function(){
+
+function autoUpdate(){
+$http.get('/subscribe').then(function(response){
+if(response.status !=200) {$interval(function(){autoUpdate();},500); return;}
+
+chatHistory.push(timeNow() + " " + response.data);
+
+autoUpdate();
+})//response
+}//autoUpdate
+autoUpdate();
+}//getFromServer
+}//return obj
+}//getService
+
+
+
+
+	//return $http.get('/subscribe',true);
 
 
 //      var newPromise=$timeout(function(){
@@ -96,18 +172,28 @@ app.service('getService', function($http){
 //      },1000);
 //      
 //      return newPromise;
-         
-    }
-  };
-});
+   
 
-app.controller('curCntrl', function(sendService, getService, $interval){
+app.controller('curCntrl', function(sendService, getService){
   var vm=this;
-  //vm.check="kjsdhgjk";
-  
-  //$timeout(function(){return getService.getFromServer(); },60000).success(function(response){});
-  
-  $interval(function(){
+
+getService.getFromServer();
+
+vm.chatData=chatHistory.join('\n');
+
+//vm.chatInfo=getService.getFromServer();
+
+//console.log(chatHistory);
+
+vm.chatHistory=chatHistory;
+//vm.chatData=vm.chatHistory.join('\n');
+
+
+
+console.log(vm.chatHistory.join("!"));
+
+
+/*  $interval(function(){
   getService.getFromServer().then(function(response){ 
 //	console.log(response);
 chatHistory.push(timeNow() + " " + response.data);
@@ -115,7 +201,7 @@ vm.chatData=chatHistory.join('\n');
 
 
 });    
-  },5000);
+  },5000);  */
   
     //alert(response);
   
